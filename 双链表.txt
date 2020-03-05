@@ -1,0 +1,260 @@
+#include<iostream>
+using namespace std;
+
+template<typename T >
+struct Node {
+	Node<T>* pre;
+	Node<T>* next;
+	T data;
+	Node(T val) :data(val), next(nullptr),pre(nullptr) {}
+};
+
+//双链表
+template<typename T >
+class DList {
+private:
+	Node<T>* head;
+	Node<T>* last;
+	int len = 1;
+public:
+	DList(T val) { head = new Node<T>(val); last = head; }
+	~DList() {}
+
+	//添加：后插入、前插入、一般位置插入
+	//后插入
+	void push_back(T val) {
+		Node<T>* node = new Node<T>(val);
+		last->next = node;
+		node->pre = last;
+		last = node;
+		len++;
+	}
+	//前插入
+	void push_front(T val) {
+		Node<T>* node = new Node<T>(val);
+		node->next = head;
+		head->pre = node;
+		head = node;
+		len++;
+	}
+	//一般插入
+	void insert(T val, int pos) {
+		if (pos > len)
+			push_back(val);
+		else if (pos == 1)
+			push_front(val);
+		else {
+			Node<T>* node = new Node<T>(val);
+			Node<T>* p = head;
+			for (int i = 1; i != pos - 1;i++)
+				p = p->next;
+			node->next = p->next;
+			p->next = node;
+			node->pre = p;
+			node->next->pre = node;
+		}
+		len++;
+	}
+
+	//删除:前推出、后推出、值删除、位置删除
+	//前推出
+	T pop_front() {
+		T val = head->data;
+		head = head->next;
+		head->pre->next = nullptr;
+		head->pre = nullptr;
+		len--;
+		return val;
+	}
+	//后推出
+	T pop_back() {
+		T val = last->data;
+		last = last->pre;
+		last->next->pre = nullptr;
+		last->next = nullptr;
+		len--;
+		return val;
+	}
+	//值删除
+	void del_val(T val) {
+		Node<T>* p;
+		p = head;
+		for (; p != nullptr;  p = p->next) {
+			if (p->data == val) {
+				if (p == head) {
+					head = head->next;
+					head->pre = nullptr;
+				}
+				else if (p == last) {
+					last = last->pre;
+					last->next = nullptr;
+				}
+				else {
+					p->pre->next = p->next;
+					p->next->pre = p->pre;
+					p->next = nullptr;
+					p->pre = nullptr;
+				}
+			}
+
+		}
+		len--;
+	}
+	//位置删除
+	T del_pos(int pos) {
+		Node<T>* p = head;
+		for (int i = 1; i != pos;i++)
+			p = p->next;
+		p->next->pre = p->pre;
+		p->pre->next = p->next;
+		p->next = nullptr;
+		p->pre = nullptr;
+		len--;
+		return p->data;
+	}
+
+	//查询:值查询、位置查询
+	//值查询
+	int find_val(T val) {
+		//返回第一次出现的位置
+		Node<T>* p = head;
+		for (int pos = 1; p != nullptr; pos++) {
+			if (p->data == val)
+				return pos;
+			p = p->next;
+		}
+		return -1;
+
+		//返回最后一次出现的位置
+		/*
+		Node<T>* p = last;
+		for (int pos = 1; p != nullptr; pos++) {
+			if (p->data == val)
+				return pos;
+			p = p->pre;
+		}
+		return -1;
+		*/
+
+		//返回数量
+		/*
+		Node<T>* p = head;
+		int n=0;
+		for (; p != nullptr;p = p->next) {
+			if (p->data == val)
+				n++;
+		}
+		if(n==0)
+		    return -1;
+		return n;
+		*/
+	}
+	//位置查询
+	T find_pos(int pos) {
+		Node<T>* p = head;
+		for (int i = 1; i != pos; i++)
+			p = p->next;
+		return p->data;
+	}
+
+	//链表复制
+	DList copy() {
+		T val = head->data;
+		DList<T> list(val);
+		Node<T>* p = head->next;
+		for (; p != nullptr; p = p->next) {
+			val = p->data;
+			list.push_back(val);
+		}
+		return list;
+	}
+
+	//打印
+	void print() {
+		Node<T>* p = head;
+		for (; p != nullptr; p = p->next) {
+			cout << p->data << ' ';
+		}
+		cout << endl;
+	}
+
+	//返回链表长度
+	int size() { return len; }
+};
+
+
+int main() {
+	DList<int> list(0);
+	//添加测试
+	cout << "----------添加测试----------" << endl;
+	cout << ".....push_back测试....." << endl;
+	for (int i = 1; i < 10; i++)
+		list.push_back(5 * i);//push_back测试
+	list.print();//print测试
+	cout << "len:" << list.size() << endl;//size测试
+
+	cout << ".....push_front测试....." << endl;
+	list.push_front(5);//push_front测试
+	list.print();
+	cout << "len:" << list.size() << endl;
+
+	cout << ".....insert测试....." << endl;
+	list.insert(6, 2);//insert测试
+	list.print();
+	cout << "len:" << list.size() << endl;
+
+
+
+
+
+	//删除测试
+	cout << "----------删除测试----------" << endl;
+	cout << ".....pop_front测试....." << endl;
+	cout << "pop_front:" << list.pop_front() << endl;//pop测试
+	list.print();
+	cout << "len:" << list.size() << endl;
+
+	cout << ".....pop_back测试....." << endl;
+	cout << "pop_back:" << list.pop_back() << endl;//pop测试
+	list.print();
+	cout << "len:" << list.size() << endl;
+
+	cout << ".....del_val测试....." << endl;
+	list.del_val(10);//del_val测试
+	list.print();
+	cout << "len:" << list.size() << endl;
+
+	cout << ".....del_pos测试....." << endl;
+	cout << "del_pos:" << list.del_pos(2) << endl;//del_pos测试
+	list.print();
+	cout << "len:" << list.size() << endl;
+
+
+
+
+
+	//查询测试
+	cout << "----------查询测试----------" << endl;
+	cout << ".....find_val测试....." << endl;
+	cout << "pos:" << list.find_val(30) << endl;
+
+	cout << ".....find_pos测试....." << endl;
+	cout << "val:" << list.find_pos(5) << endl;
+
+
+
+
+
+	//copy测试
+	cout << "----------复制测试----------" << endl;
+	DList<int> _list = list.copy();
+	cout << "list :";
+	list.print();
+	cout << "_list:";
+	_list.print();
+	list.del_pos(2);
+	cout << "list :";
+	list.print();
+	cout << "_list:";
+	_list.print();
+}
